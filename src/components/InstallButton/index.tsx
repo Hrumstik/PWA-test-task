@@ -1,10 +1,7 @@
-import { Button, Layout, Card, Progress, Row, Col } from "antd";
 import { useEffect, useState } from "react";
-import InstallButton from "./components/InstallButton";
+import { Button, Progress } from "antd";
 
-const { Content } = Layout;
-
-function App() {
+export default function InstallButton() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [installProgress, setInstallProgress] = useState(0);
@@ -64,33 +61,18 @@ function App() {
     }
   };
   return (
-    <Layout className="layout" style={{ minHeight: "100vh" }}>
-      <Row justify="center">
-        <Col xs={24} sm={24} md={20} lg={16} xl={14}>
-          <Content style={{ backgroundColor: "#ffffff" }}>
-            <Card
-              title="Welcome to My PWA"
-              bordered={true}
-              style={{ width: 300 }}
-            >
-              {installProgress > 0 && <Progress percent={installProgress} />}
-              {showDownloadButton && (
-                <Button type="primary" block onClick={downloadPWA}>
-                  Download
-                </Button>
-              )}
-              {isDownloaded && (
-                <Button type="primary" block onClick={installPWA}>
-                  {installing ? "Installing" : "Install"}
-                </Button>
-              )}
-              <InstallButton />
-            </Card>
-          </Content>
-        </Col>
-      </Row>
-    </Layout>
+    <>
+      {installProgress > 0 && <Progress percent={installProgress} />}
+      {showDownloadButton && (
+        <Button type="primary" block onClick={downloadPWA}>
+          Download
+        </Button>
+      )}
+      {isDownloaded && (
+        <Button type="primary" block onClick={installPWA}>
+          {installing ? "Installing" : "Install"}
+        </Button>
+      )}
+    </>
   );
 }
-
-export default App;
