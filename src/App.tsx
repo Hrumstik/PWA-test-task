@@ -1,92 +1,74 @@
-import { Button, Layout, Card, Progress, Row, Col } from "antd";
-import { useEffect, useState } from "react";
+import { Layout, Row, Col } from "antd";
+import {
+  AppContainer,
+  Image,
+  InfoContainer,
+  Title,
+  Developer,
+  AgeRating,
+  BadgeContainer,
+  EditorChoiceTag,
+  VoteCount,
+  DevelopersWrapper,
+  InfoWrapper,
+  StarsContainer,
+  EditorChoiceWrapper,
+  EditorChoiseIcon,
+  LogoSection,
+  StarsSection,
+  UserIcon,
+} from "./styles";
 import InstallButton from "./components/InstallButton";
-
-const { Content } = Layout;
 
 function App() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [installPrompt, setInstallPrompt] = useState<any>(null);
-  const [installProgress, setInstallProgress] = useState(0);
-  const [isDownloaded, setIsDownloaded] = useState(false);
-  const [showDownloadButton, setShowDownloadButton] = useState(true);
-  const [isPWAInstalled, setIsPWAInstalled] = useState(false);
-  const [installing, setInstalling] = useState(false);
+  const filledStar = "★";
+  const stars = `${filledStar.repeat(5)}`;
+  const voteCount = "1627";
 
-  useEffect(() => {
-    const isPWAInstalledOnLoad = window.matchMedia(
-      "(display-mode: standalone)"
-    ).matches;
-    setIsPWAInstalled(isPWAInstalledOnLoad);
-
-    window.addEventListener("beforeinstallprompt", (e) => {
-      setInstallPrompt(e);
-      console.log("It is okay");
-    });
-
-    window.addEventListener("appinstalled", () => {
-      setIsPWAInstalled(true);
-      window.location.href = "https://www.youtube.com/watch?v=37vhxQQukdE";
-    });
-  }, []);
-
-  const downloadPWA = async () => {
-    if (!installPrompt && isPWAInstalled) return;
-    setShowDownloadButton(false);
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 20;
-      setInstallProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        setIsDownloaded(true);
-        setInstallProgress(0);
-      }
-    }, 1000);
-  };
-
-  const installPWA = () => {
-    if (isPWAInstalled) {
-      setInstalling(true);
-      setTimeout(() => {
-        window.location.href = "https://www.youtube.com/watch?v=37vhxQQukdE";
-      }, 10000);
-    } else {
-      installPrompt.prompt();
-      installPrompt.userChoice.then((choiceResult: { outcome: string }) => {
-        if (choiceResult.outcome === "accepted") {
-          console.log("PWA installed");
-        } else {
-          console.log("PWA installation rejected");
-        }
-        setInstallPrompt(null);
-      });
-    }
-  };
   return (
-    <Layout className="layout" style={{ minHeight: "100vh" }}>
+    <Layout
+      className="layout"
+      style={{ minHeight: "100vh", paddingTop: "32px" }}
+    >
       <Row justify="center">
-        <Col xs={24} sm={24} md={20} lg={16} xl={14}>
-          <Content style={{ backgroundColor: "#ffffff" }}>
-            <Card
-              title="Welcome to My PWA"
-              bordered={true}
-              style={{ width: 300 }}
-            >
-              {installProgress > 0 && <Progress percent={installProgress} />}
-              {showDownloadButton && (
-                <Button type="primary" block onClick={downloadPWA}>
-                  Download
-                </Button>
-              )}
-              {isDownloaded && (
-                <Button type="primary" block onClick={installPWA}>
-                  {installing ? "Installing" : "Install"}
-                </Button>
-              )}
-              <InstallButton />
-            </Card>
-          </Content>
+        <Col xs={24} sm={20} md={18} lg={16} xl={14}>
+          <AppContainer>
+            <InfoContainer>
+              <Row style={{ width: "100%" }}>
+                <Col xs={24} sm={18} md={18} lg={18} xl={18}>
+                  <LogoSection>
+                    <Image src="/267478337023.jpg" alt="App Icon" />
+                    <InfoWrapper>
+                      <Title>Best Slots</Title>
+                      <DevelopersWrapper>
+                        <Developer>Nine Dev</Developer>
+                        <Developer>Casino</Developer>
+                      </DevelopersWrapper>
+                      <AgeRating>18+</AgeRating>
+                    </InfoWrapper>
+                  </LogoSection>
+                </Col>
+                <Col xs={12} sm={6} md={6} lg={6} xl={6}>
+                  <BadgeContainer>
+                    <EditorChoiceWrapper>
+                      <EditorChoiseIcon
+                        src="/choise.png"
+                        alt="App Icon"
+                      ></EditorChoiseIcon>
+                      <EditorChoiceTag>Editor's choice</EditorChoiceTag>
+                    </EditorChoiceWrapper>
+                    <StarsSection>
+                      <StarsContainer>{stars}</StarsContainer>
+                      <VoteCount>{voteCount}</VoteCount>
+                      <UserIcon src="/user.png" alt="App Icon"></UserIcon>
+                    </StarsSection>
+                    <InstallButton />
+                  </BadgeContainer>
+                </Col>
+              </Row>
+            </InfoContainer>
+          </AppContainer>
         </Col>
       </Row>
     </Layout>

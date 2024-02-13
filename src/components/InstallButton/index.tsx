@@ -22,7 +22,6 @@ export default function InstallButton() {
     });
 
     window.addEventListener("appinstalled", () => {
-      setIsPWAInstalled(true);
       window.location.href = "https://www.youtube.com/watch?v=37vhxQQukdE";
     });
   }, []);
@@ -62,14 +61,37 @@ export default function InstallButton() {
   };
   return (
     <>
-      {installProgress > 0 && <Progress percent={installProgress} />}
+      {installProgress > 0 && (
+        <Progress
+          strokeColor={{ "0%": "rgb(0, 135, 95)", "100%": "rgb(0, 135, 95)" }}
+          percent={installProgress}
+        />
+      )}
       {showDownloadButton && (
-        <Button type="primary" block onClick={downloadPWA}>
+        <Button
+          style={{
+            backgroundColor: "rgb(0, 135, 95)",
+            borderColor: "rgb(0, 135, 95)",
+            color: "#fff",
+          }}
+          type="primary"
+          block
+          onClick={downloadPWA}
+        >
           Download
         </Button>
       )}
       {isDownloaded && (
-        <Button type="primary" block onClick={installPWA}>
+        <Button
+          style={{
+            backgroundColor: "rgb(0, 135, 95)",
+            borderColor: "rgb(0, 135, 95)",
+            color: "#fff",
+          }}
+          type="primary"
+          block
+          onClick={installPWA}
+        >
           {installing ? "Installing" : "Install"}
         </Button>
       )}
