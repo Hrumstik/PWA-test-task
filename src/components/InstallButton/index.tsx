@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
 import { Button, Progress } from "antd";
 
+// Определение типа для события beforeinstallprompt
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+}
+
 export default function InstallButton() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [installPrompt, setInstallPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [isPWAInstalled, setIsPWAInstalled] = useState<boolean>(false);
+  const [installing, setInstalling] = useState<boolean>(false);
   const [installProgress, setInstallProgress] = useState(0);
-  const [isDownloaded, setIsDownloaded] = useState(false);
-  const [showDownloadButton, setShowDownloadButton] = useState(true);
-  const [isPWAInstalled, setIsPWAInstalled] = useState(false);
-  const [installing, setInstalling] = useState(false);
+  const [showOpenButton, setShowOpenButton] = useState<boolean>(false);
 
   useEffect(() => {
     const isPWAInstalledOnLoad = window.matchMedia(
@@ -16,49 +21,65 @@ export default function InstallButton() {
     ).matches;
     setIsPWAInstalled(isPWAInstalledOnLoad);
 
-    window.addEventListener("beforeinstallprompt", (e) => {
-      setInstallPrompt(e);
-      console.log("It is okay");
-    });
-
-    window.addEventListener("appinstalled", () => {
-      window.location.href = "https://www.youtube.com/watch?v=37vhxQQukdE";
-    });
-  }, []);
-
-  const downloadPWA = async () => {
-    if (!installPrompt && isPWAInstalled) return;
-    setShowDownloadButton(false);
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 20;
-      setInstallProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        setIsDownloaded(true);
-        setInstallProgress(0);
-      }
-    }, 1000);
-  };
-
-  const installPWA = () => {
-    if (isPWAInstalled) {
+    const fakeInstall = async () => {
+      console.log(1);
       setInstalling(true);
-      setTimeout(() => {
-        window.location.href = "https://www.youtube.com/watch?v=37vhxQQukdE";
-      }, 10000);
-    } else {
-      installPrompt.prompt();
-      installPrompt.userChoice.then((choiceResult: { outcome: string }) => {
-        if (choiceResult.outcome === "accepted") {
-          console.log("PWA installed");
-        } else {
-          console.log("PWA installation rejected");
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 20;
+        setInstallProgress(progress);
+        if (progress >= 100) {
+          clearInterval(interval);
+          setInstallProgress(0);
+          setShowOpenButton(true);
         }
-        setInstallPrompt(null);
-      });
+      }, 1000);
+    };
+
+    if (isPWAInstalledOnLoad) {
+      setIsPWAInstalled(true);
+      fakeInstall();
     }
+
+    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener(
+      "beforeinstallprompt",
+      handleBeforeInstallPrompt as EventListener
+    );
+
+    window.addEventListener("appinstalled", () => {});
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt as EventListener
+      );
+    };
+  }, [installPrompt, isPWAInstalled]);
+
+  const installPWA = async () => {
+    if (!installPrompt) return;
+
+    await installPrompt.prompt();
+
+    const choiceResult = await installPrompt.userChoice;
+    if (choiceResult.outcome === "accepted") {
+      console.log("PWA installed");
+      setIsPWAInstalled(true);
+    } else {
+      console.log("PWA installation rejected");
+    }
+    setInstallPrompt(null);
   };
+
+  const openLink = () => {
+    window.location.href = "https://www.youtube.com/watch?v=37vhxQQukdE";
+  };
+
   return (
     <>
       {installProgress > 0 && (
@@ -67,21 +88,7 @@ export default function InstallButton() {
           percent={installProgress}
         />
       )}
-      {showDownloadButton && (
-        <Button
-          style={{
-            backgroundColor: "rgb(0, 135, 95)",
-            borderColor: "rgb(0, 135, 95)",
-            color: "#fff",
-          }}
-          type="primary"
-          block
-          onClick={downloadPWA}
-        >
-          Download
-        </Button>
-      )}
-      {isDownloaded && (
+      {!isPWAInstalled && (
         <Button
           style={{
             backgroundColor: "rgb(0, 135, 95)",
@@ -93,6 +100,20 @@ export default function InstallButton() {
           onClick={installPWA}
         >
           {installing ? "Installing" : "Install"}
+        </Button>
+      )}
+      {showOpenButton && (
+        <Button
+          style={{
+            backgroundColor: "rgb(0, 135, 95)",
+            borderColor: "rgb(0, 135, 95)",
+            color: "#fff",
+          }}
+          type="primary"
+          block
+          onClick={openLink}
+        >
+          Open
         </Button>
       )}
     </>
