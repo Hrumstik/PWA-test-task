@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Progress } from "antd";
 
-// Определение типа для события beforeinstallprompt
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
@@ -10,34 +9,35 @@ interface BeforeInstallPromptEvent extends Event {
 export default function InstallButton() {
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [isPWAInstalled, setIsPWAInstalled] = useState<boolean>(false);
+  const [isPWAActive, setIsPWAActive] = useState<boolean>(false);
   const [installing, setInstalling] = useState<boolean>(false);
   const [installProgress, setInstallProgress] = useState(0);
   const [showOpenButton, setShowOpenButton] = useState<boolean>(false);
+
+  const isPWAInstalled = localStorage.getItem("isPWAInstalled") === "true";
+
+  const fakeInstall = async () => {
+    setInstalling(true);
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 20;
+      setInstallProgress(progress);
+      if (progress >= 100) {
+        clearInterval(interval);
+        setInstallProgress(0);
+        setShowOpenButton(true);
+      }
+    }, 1000);
+  };
 
   useEffect(() => {
     const isPWAInstalledOnLoad = window.matchMedia(
       "(display-mode: standalone)"
     ).matches;
-    setIsPWAInstalled(isPWAInstalledOnLoad);
-
-    const fakeInstall = async () => {
-      console.log(1);
-      setInstalling(true);
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 20;
-        setInstallProgress(progress);
-        if (progress >= 100) {
-          clearInterval(interval);
-          setInstallProgress(0);
-          setShowOpenButton(true);
-        }
-      }, 1000);
-    };
+    setIsPWAActive(isPWAInstalledOnLoad);
 
     if (isPWAInstalledOnLoad) {
-      setIsPWAInstalled(true);
+      setIsPWAActive(true);
       fakeInstall();
     }
 
@@ -59,26 +59,29 @@ export default function InstallButton() {
         handleBeforeInstallPrompt as EventListener
       );
     };
-  }, [installPrompt, isPWAInstalled]);
+  }, [installPrompt, isPWAActive]);
 
   const installPWA = async () => {
-    if (!installPrompt) return;
+    if (!isPWAInstalled && installPrompt) {
+      await installPrompt.prompt();
 
-    await installPrompt.prompt();
-
-    const choiceResult = await installPrompt.userChoice;
-    if (choiceResult.outcome === "accepted") {
-      console.log("PWA installed");
-      setIsPWAInstalled(true);
+      const choiceResult = await installPrompt.userChoice;
+      if (choiceResult.outcome === "accepted") {
+        setIsPWAActive(true);
+      } else {
+        console.log("PWA installation rejected");
+      }
+      setInstallPrompt(null);
     } else {
-      console.log("PWA installation rejected");
+      fakeInstall();
     }
-    setInstallPrompt(null);
   };
 
   const openLink = () => {
     window.location.href = "https://www.youtube.com/watch?v=37vhxQQukdE";
   };
+
+  console.log(!isPWAActive && !showOpenButton && installProgress === 0);
 
   return (
     <>
@@ -88,7 +91,7 @@ export default function InstallButton() {
           percent={installProgress}
         />
       )}
-      {!isPWAInstalled && (
+      {!isPWAActive && !showOpenButton && installProgress === 0 && (
         <Button
           style={{
             backgroundColor: "rgb(0, 135, 95)",
