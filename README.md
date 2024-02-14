@@ -7,3 +7,6 @@
    - Navigate to the project directory and install dependencies: `npm install`.
    - Build the project: `npm run build`.
    - Start the application: `npm run preview`.
+
+## Deployment
+The project has been deployed using Vercel and is accessible via the following link - https://pwa-test-task.vercel.app/.
