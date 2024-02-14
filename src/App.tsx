@@ -48,7 +48,13 @@ function App() {
                     </InfoWrapper>
                   </LogoSection>
                 </Col>
-                <Col xs={12} sm={6} md={6} lg={6} xl={6}>
+                <Col
+                  xs={{ offset: 6, span: 12 }}
+                  sm={{ offset: 6, span: 12 }}
+                  md={{ offset: 0, span: 6 }}
+                  lg={{ offset: 0, span: 6 }}
+                  xl={{ offset: 0, span: 6 }}
+                >
                   <BadgeContainer>
                     <EditorChoiceWrapper>
                       <EditorChoiseIcon
