@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Progress } from "antd";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -6,13 +6,17 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
 
-export default function InstallButton() {
+interface Props {
+  link: string;
+}
+
+const InstallButton: React.FC<Props> = ({ link }) => {
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [isPWAActive, setIsPWAActive] = useState<boolean>(false);
-  const [installing, setInstalling] = useState<boolean>(false);
+  const [isPWAActive, setIsPWAActive] = useState(false);
+  const [installing, setInstalling] = useState(false);
   const [installProgress, setInstallProgress] = useState(0);
-  const [showOpenButton, setShowOpenButton] = useState<boolean>(false);
+  const [showOpenButton, setShowOpenButton] = useState(false);
 
   const isPWAInstalled = localStorage.getItem("isPWAInstalled") === "true";
 
@@ -31,12 +35,12 @@ export default function InstallButton() {
   };
 
   useEffect(() => {
-    const isPWAInstalledOnLoad = window.matchMedia(
+    const isPWAActiveted = window.matchMedia(
       "(display-mode: standalone)"
     ).matches;
-    setIsPWAActive(isPWAInstalledOnLoad);
+    setIsPWAActive(isPWAActiveted);
 
-    if (isPWAInstalledOnLoad) {
+    if (isPWAActiveted) {
       setIsPWAActive(true);
       fakeInstall();
     }
@@ -50,8 +54,6 @@ export default function InstallButton() {
       "beforeinstallprompt",
       handleBeforeInstallPrompt as EventListener
     );
-
-    window.addEventListener("appinstalled", () => {});
 
     return () => {
       window.removeEventListener(
@@ -69,8 +71,9 @@ export default function InstallButton() {
       if (choiceResult.outcome === "accepted") {
         setIsPWAActive(true);
       } else {
-        console.log("PWA installation rejected");
+        alert("PWA installation rejected");
       }
+
       setInstallPrompt(null);
     } else {
       fakeInstall();
@@ -78,10 +81,8 @@ export default function InstallButton() {
   };
 
   const openLink = () => {
-    window.location.href = "https://www.youtube.com/watch?v=37vhxQQukdE";
+    window.location.href = link;
   };
-
-  console.log(!isPWAActive && !showOpenButton && installProgress === 0);
 
   return (
     <>
@@ -121,4 +122,6 @@ export default function InstallButton() {
       )}
     </>
   );
-}
+};
+
+export default InstallButton;

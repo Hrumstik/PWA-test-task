@@ -21,7 +21,6 @@ import {
 import InstallButton from "./components/InstallButton";
 
 function App() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filledStar = "★";
   const stars = `${filledStar.repeat(5)}`;
   const voteCount = "1627";
@@ -63,7 +62,7 @@ function App() {
                       <VoteCount>{voteCount}</VoteCount>
                       <UserIcon src="/user.png" alt="App Icon"></UserIcon>
                     </StarsSection>
-                    <InstallButton />
+                    <InstallButton link="https://www.youtube.com/watch?v=37vhxQQukdE" />
                   </BadgeContainer>
                 </Col>
               </Row>
