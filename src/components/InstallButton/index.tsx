@@ -19,8 +19,6 @@ const InstallButton: React.FC<Props> = ({ link }) => {
   const [isFakeLoadingEnded, setIsFakeLoadingEnded] = useState(false);
   const [showOpenButton, setShowOpenButton] = useState(false);
 
-  const isPWAInstalled = localStorage.getItem("isPWAInstalled") === "true";
-
   const fakeInstall = async () => {
     let progress = 0;
     const interval = setInterval(() => {
@@ -64,13 +62,12 @@ const InstallButton: React.FC<Props> = ({ link }) => {
   }, [installPrompt, isPWAActive]);
 
   const installPWA = async () => {
-    if (!isPWAInstalled && installPrompt) {
+    if (installPrompt) {
       setInstalling(true);
       await installPrompt.prompt();
       const choiceResult = await installPrompt.userChoice;
       if (choiceResult.outcome === "accepted") {
         setIsPWAActive(true);
-        localStorage.setItem("isPWAInstalled", "true");
       } else {
         alert("PWA installation rejected");
       }
@@ -85,13 +82,9 @@ const InstallButton: React.FC<Props> = ({ link }) => {
   };
 
   const showDownloadButton =
-    !isPWAActive &&
-    !isFakeLoadingEnded &&
-    installProgress === 0 &&
-    !isPWAInstalled;
-  const showInstallButton =
-    !isPWAActive && isFakeLoadingEnded && !isPWAInstalled;
-  const showOpenAppButton = (isPWAActive && showOpenButton) || isPWAInstalled;
+    !isPWAActive && !isFakeLoadingEnded && installProgress === 0;
+  const showInstallButton = !isPWAActive && isFakeLoadingEnded;
+  const showOpenAppButton = isPWAActive && showOpenButton;
 
   return (
     <>
@@ -103,6 +96,7 @@ const InstallButton: React.FC<Props> = ({ link }) => {
       )}
       {showDownloadButton && (
         <Button
+          disabled={!installPrompt}
           style={{
             backgroundColor: "rgb(0, 135, 95)",
             borderColor: "rgb(0, 135, 95)",
