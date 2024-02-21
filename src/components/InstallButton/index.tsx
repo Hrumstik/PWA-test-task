@@ -1,5 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Button, Progress } from "antd";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+import React, { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import styled from "@emotion/styled";
+import { useSelector, useDispatch } from "react-redux";
+import { install, stopInstalling } from "../../Redux/feat/InstallSlice";
+import { Button } from "@mui/material";
+import { CustomButton, colors } from "../styles";
+import { useIntl } from "react-intl";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -10,42 +18,49 @@ interface Props {
   link: string;
 }
 
+const AnimatedButton = styled<any>(motion(Button), {
+  shouldForwardProp: (prop) => prop !== "$isInstalling",
+})`
+  border-radius: 20px;
+  border: none;
+  font-family: "Roboto", sans-serif;
+  font-weight: 500;
+  text-transform: none;
+  box-shadow: none;
+  margin-bottom: 24px;
+  background-color: ${(props) =>
+    props.$isInstalling ? colors.background : colors.buttonBackground};
+  color: ${(props) => (props.$isInstalling ? colors.disabledText : "white")};
+  &:hover {
+    background-color: ${(props) =>
+      props.$isInstalling ? colors.background : colors.primary};
+    box-shadow: none;
+  }
+  &:active {
+    background-color: ${(props) =>
+      props.$isInstalling ? colors.background : colors.primary};
+  }
+`;
 const InstallButton: React.FC<Props> = ({ link }) => {
-  const [installPrompt, setInstallPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
+  const installPromptRef = useRef<BeforeInstallPromptEvent | null>(null);
   const [isPWAActive, setIsPWAActive] = useState(false);
-  const [installing, setInstalling] = useState(false);
-  const [installProgress, setInstallProgress] = useState(0);
-  const [isFakeLoadingEnded, setIsFakeLoadingEnded] = useState(false);
-  const [showOpenButton, setShowOpenButton] = useState(false);
-
-  const fakeInstall = async () => {
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 20;
-      setInstallProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        setInstallProgress(0);
-        setIsFakeLoadingEnded(true);
-      }
-    }, 1000);
-  };
+  const isInstalling = useSelector(({ install }) => install.isInstalling);
+  const dispatch = useDispatch();
+  const intl = useIntl();
 
   useEffect(() => {
     const isPWAActiveted = window.matchMedia(
-      "(display-mode: standalone)"
+      "(display-mode: minimal-ui)"
     ).matches;
-    setIsPWAActive(isPWAActiveted);
 
     if (isPWAActiveted) {
       setIsPWAActive(true);
-      setShowOpenButton(true);
+      window.location.href = link;
     }
 
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
       e.preventDefault();
-      setInstallPrompt(e);
+      installPromptRef.current = e;
     };
 
     window.addEventListener(
@@ -53,27 +68,31 @@ const InstallButton: React.FC<Props> = ({ link }) => {
       handleBeforeInstallPrompt as EventListener
     );
 
+    window.addEventListener("appinstalled", () => {
+      dispatch(stopInstalling());
+      setIsPWAActive(true);
+    });
+
     return () => {
       window.removeEventListener(
         "beforeinstallprompt",
         handleBeforeInstallPrompt as EventListener
       );
     };
-  }, [installPrompt, isPWAActive]);
+  }, [link, dispatch]);
 
   const installPWA = async () => {
-    if (installPrompt) {
-      setInstalling(true);
-      await installPrompt.prompt();
-      const choiceResult = await installPrompt.userChoice;
+    dispatch(install());
+    if (installPromptRef.current) {
+      dispatch(install());
+      await installPromptRef.current.prompt();
+      const choiceResult = await installPromptRef.current.userChoice;
       if (choiceResult.outcome === "accepted") {
-        setIsPWAActive(true);
+        console.log("PWA installation was accepted");
       } else {
         alert("PWA installation rejected");
       }
-
-      setInstallPrompt(null);
-      setShowOpenButton(true);
+      installPromptRef.current = null;
     }
   };
 
@@ -81,63 +100,21 @@ const InstallButton: React.FC<Props> = ({ link }) => {
     window.location.href = link;
   };
 
-  const showDownloadButton =
-    !isPWAActive && !isFakeLoadingEnded && installProgress === 0;
-  const showInstallButton = !isPWAActive && isFakeLoadingEnded;
-  const showOpenAppButton = isPWAActive && showOpenButton;
-
-  return (
-    <>
-      {installProgress > 0 && (
-        <Progress
-          strokeColor={{ "0%": "rgb(0, 135, 95)", "100%": "rgb(0, 135, 95)" }}
-          percent={installProgress}
-        />
-      )}
-      {showDownloadButton && (
-        <Button
-          disabled={!installPrompt}
-          style={{
-            backgroundColor: "rgb(0, 135, 95)",
-            borderColor: "rgb(0, 135, 95)",
-            color: "#fff",
-          }}
-          type="primary"
-          onClick={fakeInstall}
-          block
-        >
-          Download
-        </Button>
-      )}
-      {showInstallButton && (
-        <Button
-          style={{
-            backgroundColor: "rgb(0, 135, 95)",
-            borderColor: "rgb(0, 135, 95)",
-            color: "#fff",
-          }}
-          type="primary"
-          block
-          onClick={installPWA}
-        >
-          {installing ? "Installing" : "Install"}
-        </Button>
-      )}
-      {showOpenAppButton && (
-        <Button
-          style={{
-            backgroundColor: "rgb(0, 135, 95)",
-            borderColor: "rgb(0, 135, 95)",
-            color: "#fff",
-          }}
-          type="primary"
-          block
-          onClick={openLink}
-        >
-          Open
-        </Button>
-      )}
-    </>
+  return isPWAActive ? (
+    <CustomButton fullWidth onClick={openLink}>
+      {intl.formatMessage({ id: "open" })}
+    </CustomButton>
+  ) : (
+    <AnimatedButton
+      fullWidth
+      onClick={!isInstalling && installPWA}
+      $isInstalling={isInstalling}
+      disabled={isInstalling}
+    >
+      {isInstalling
+        ? intl.formatMessage({ id: "open" })
+        : intl.formatMessage({ id: "install" })}
+    </AnimatedButton>
   );
 };
 

@@ -1,83 +1,186 @@
-import { Layout, Row, Col } from "antd";
+import { Rating } from "@mui/material";
+import StarIcon from "@mui/icons-material/Star";
+import ContentSlider from "./components/ContentSlider";
+import ChipSlider from "./components/ChipSlider";
+import OpenSectionButton from "./components/OpenSectionButton";
+import Review from "./components/Review";
 import {
-  AppContainer,
-  Image,
-  InfoContainer,
-  Title,
-  Developer,
-  AgeRating,
-  BadgeContainer,
-  EditorChoiceTag,
-  VoteCount,
-  DevelopersWrapper,
-  InfoWrapper,
-  StarsContainer,
-  EditorChoiceWrapper,
-  EditorChoiseIcon,
-  LogoSection,
-  StarsSection,
-  UserIcon,
-} from "./styles";
+  MainContainer,
+  AppDescriptionSection,
+  AppNameContainer,
+  AppHeader,
+  AppHeaderInfoContainer,
+  AppDeveloperСompanyName,
+  AppStatisticsCard,
+  AppStatisticsCardItem,
+  VerticalDivider,
+  AppStatisticsCardItemTitle,
+  AppStatisticsCardItemContent,
+  AgeLogoContainer,
+  AboutGameContainer,
+  ShortDescriptionWrapper,
+  AppRateContainer,
+  AppRatesAndSection,
+  AppRatesAndReviewsContainer,
+  AppStarsContainer,
+  AppRatesCountContainer,
+  AppRatingContainer,
+  RatingContainer,
+  StarsCount,
+  RatingChart,
+  ReviewsSection,
+  AgeImg,
+} from "./components/styles";
 import InstallButton from "./components/InstallButton";
+import AppLogo from "./components/AppLogo";
+import { useIntl } from "react-intl";
 
-function App() {
-  const filledStar = "★";
-  const stars = `${filledStar.repeat(5)}`;
-  const voteCount = "1627";
+const reviewsData = [
+  {
+    name: "Stephanie Watson",
+    avatarName: "S",
+    color: "blueGrey",
+    stars: 5,
+    reviewKey: "Watson",
+    date: "19/02/2024",
+  },
+  {
+    name: "Sheff816",
+    avatarName: "F",
+    color: "blue",
+    stars: 5,
+    reviewKey: "Sheff816",
+    date: "20/02/2024",
+  },
+  {
+    name: "Matthew",
+    avatarName: "M",
+    color: "deepPurple",
+    stars: 5,
+    reviewKey: "Matthew",
+    date: "18/02/2024",
+  },
+  {
+    name: "MassesOfPalpur",
+    avatarName: "M",
+    color: "brown",
+    stars: 5,
+    reviewKey: "MassesOfPalpur",
+    date: "19/02/2024",
+  },
+  {
+    name: "Opposum",
+    avatarName: "O",
+    color: "green",
+    stars: 5,
+    reviewKey: "Opposum",
+    date: "20/02/2024",
+  },
+];
+
+const ratingsData = [
+  { stars: 5, rating: 95 },
+  { stars: 4, rating: 1 },
+  { stars: 3, rating: 1 },
+  { stars: 2, rating: 1 },
+  { stars: 1, rating: 1 },
+];
+
+export default function Index() {
+  const intl = useIntl();
 
   return (
-    <Layout
-      className="layout"
-      style={{ minHeight: "100vh", paddingTop: "32px" }}
-    >
-      <Row justify="center">
-        <Col xs={24} sm={20} md={18} lg={16} xl={14}>
-          <AppContainer>
-            <InfoContainer>
-              <Row style={{ width: "100%" }}>
-                <Col xs={24} sm={18} md={18} lg={18} xl={18}>
-                  <LogoSection>
-                    <Image src="/267478337023.jpg" alt="App Icon" />
-                    <InfoWrapper>
-                      <Title>Best Slots</Title>
-                      <DevelopersWrapper>
-                        <Developer>Nine Dev</Developer>
-                        <Developer>Casino</Developer>
-                      </DevelopersWrapper>
-                      <AgeRating>18+</AgeRating>
-                    </InfoWrapper>
-                  </LogoSection>
-                </Col>
-                <Col
-                  xs={{ offset: 6, span: 12 }}
-                  sm={{ offset: 6, span: 12 }}
-                  md={{ offset: 0, span: 6 }}
-                  lg={{ offset: 0, span: 6 }}
-                  xl={{ offset: 0, span: 6 }}
-                >
-                  <BadgeContainer>
-                    <EditorChoiceWrapper>
-                      <EditorChoiseIcon
-                        src="/choise.png"
-                        alt="App Icon"
-                      ></EditorChoiseIcon>
-                      <EditorChoiceTag>Editor's choice</EditorChoiceTag>
-                    </EditorChoiceWrapper>
-                    <StarsSection>
-                      <StarsContainer>{stars}</StarsContainer>
-                      <VoteCount>{voteCount}</VoteCount>
-                      <UserIcon src="/user.png" alt="App Icon"></UserIcon>
-                    </StarsSection>
-                    <InstallButton link="https://www.youtube.com/watch?v=37vhxQQukdE" />
-                  </BadgeContainer>
-                </Col>
-              </Row>
-            </InfoContainer>
-          </AppContainer>
-        </Col>
-      </Row>
-    </Layout>
+    <MainContainer>
+      <AppDescriptionSection>
+        <AppHeader>
+          <AppLogo />
+          <AppHeaderInfoContainer>
+            <AppNameContainer>
+              {intl.formatMessage({ id: "name" })}
+            </AppNameContainer>
+            <AppDeveloperСompanyName>
+              {intl.formatMessage({ id: "developerName" })}
+            </AppDeveloperСompanyName>
+          </AppHeaderInfoContainer>
+        </AppHeader>
+        <AppStatisticsCard>
+          <AppStatisticsCardItem>
+            <AppStatisticsCardItemTitle>
+              5,0 <StarIcon fontSize="inherit" />
+            </AppStatisticsCardItemTitle>
+            <AppStatisticsCardItemContent>
+              {intl.formatMessage({ id: "reviews" })}
+            </AppStatisticsCardItemContent>
+          </AppStatisticsCardItem>
+          <VerticalDivider orientation="vertical" variant="inset" flexItem />
+          <AppStatisticsCardItem>
+            <AppStatisticsCardItemTitle>1000 +</AppStatisticsCardItemTitle>
+            <AppStatisticsCardItemContent>
+              {intl.formatMessage({ id: "donwloads" })}
+            </AppStatisticsCardItemContent>
+          </AppStatisticsCardItem>
+          <VerticalDivider orientation="vertical" variant="inset" flexItem />
+          <AppStatisticsCardItem>
+            <AppStatisticsCardItemTitle>
+              <AgeLogoContainer>
+                <AgeImg src="/18.png" alt="Age icon" />
+              </AgeLogoContainer>
+            </AppStatisticsCardItemTitle>
+            <AppStatisticsCardItemContent>
+              {intl.formatMessage({ id: "age" })}
+            </AppStatisticsCardItemContent>
+          </AppStatisticsCardItem>
+        </AppStatisticsCard>
+        <InstallButton link="https://benioosn.com/ee27112d91?extra_param_1=49487" />
+        <ContentSlider />
+        <AboutGameContainer>
+          <OpenSectionButton string="about" />
+        </AboutGameContainer>
+        <ShortDescriptionWrapper>
+          {intl.formatMessage({ id: "shortDescription" })}
+        </ShortDescriptionWrapper>
+
+        <ChipSlider />
+      </AppDescriptionSection>
+      <AppRatesAndSection>
+        <AboutGameContainer>
+          <OpenSectionButton string="ratingAndReviews" />
+        </AboutGameContainer>
+        <AppRatesAndReviewsContainer>
+          <AppRateContainer>4.9</AppRateContainer>
+          <AppStarsContainer>
+            <Rating
+              name="half-rating-read"
+              defaultValue={4.6}
+              precision={0.1}
+              readOnly
+              sx={{ color: "rgb(11, 87, 207)", fontSize: "14px" }}
+            />
+          </AppStarsContainer>
+          <AppRatesCountContainer>21,301</AppRatesCountContainer>
+          <AppRatingContainer>
+            {ratingsData.map((data, index) => (
+              <RatingContainer key={index}>
+                <StarsCount>{data.stars}</StarsCount>
+                <RatingChart rating={data.rating} />
+              </RatingContainer>
+            ))}
+          </AppRatingContainer>
+        </AppRatesAndReviewsContainer>
+      </AppRatesAndSection>
+      <ReviewsSection>
+        {reviewsData.map((review) => (
+          <Review
+            key={review.name}
+            name={review.name}
+            avatarName={review.avatarName}
+            color={review.color}
+            stars={review.stars}
+            text={intl.formatMessage({ id: review.reviewKey })}
+            date={review.date}
+          />
+        ))}
+      </ReviewsSection>
+    </MainContainer>
   );
 }
-
-export default App;
